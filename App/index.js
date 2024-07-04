@@ -1,53 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+// Filename: index.js
+// Combined code from all files
 
-const App = () => {
-  const fullText = 'Hi, this is Apply.\nCreating mobile apps is now as simple as typing text.\nJust input your idea and press APPLY, and our platform does the rest...';
-  const [displayedText, setDisplayedText] = useState('');
-  const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { SafeAreaView, FlatList, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 
-  useEffect(() => {
-    if (isPaused) return;
+const fairyTales = [
+  { id: '1', title: 'Cinderella', content: 'Once upon a time, there was a girl named Cinderella...' },
+  { id: '2', title: 'Snow White', content: 'Once upon a time, there was a girl named Snow White...' },
+  { id: '3', title: 'Little Red Riding Hood', content: 'Once upon a time, there was a girl named Little Red Riding Hood...' },
+  { id: '4', title: 'Hansel and Gretel', content: 'Once upon a time, there were two siblings named Hansel and Gretel...' }
+];
 
-    const interval = setInterval(() => {
-      setDisplayedText((prev) => prev + fullText[index]);
-      setIndex((prev) => {
-        if (prev === fullText.length - 1) {
-          setIsPaused(true);
-          setTimeout(() => {
-            setDisplayedText('');
-            setIndex(0);
-            setIsPaused(false);
-          }, 2000);
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [index, isPaused]);
+function HomeScreen({ navigation }) {
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={stylesHome.item} onPress={() => navigation.navigate('Story', { story: item })}>
+      <Text style={stylesHome.title}>{item.title}</Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>{displayedText}</Text>
-    </View>
+    <SafeAreaView style={stylesHome.container}>
+      <FlatList
+        data={fairyTales}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        contentContainerStyle={stylesHome.list}
+      />
+    </SafeAreaView>
   );
-};
+}
 
-const styles = StyleSheet.create({
+const stylesHome = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'black',
-    padding: 20,
+    marginTop: 10,
   },
-  text: {
-    color: 'white',
-    fontSize: 24,
-    fontFamily: 'monospace',
+  list: {
+    paddingHorizontal: 10,
+  },
+  item: {
+    backgroundColor: '#E5E4E2',
+    padding: 20,
+    marginVertical: 8,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 18,
   },
 });
 
-export default App;
+function StoryScreen({ route }) {
+  const { story } = route.params;
+
+  return (
+    <SafeAreaView style={stylesStory.container}>
+      <ScrollView contentContainerStyle={stylesStory.storyContainer}>
+        <Text style={stylesStory.title}>{story.title}</Text>
+        <Text style={stylesStory.content}>{story.content}</Text>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const stylesStory = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginTop: 10,
+  },
+  storyContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  content: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+});
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Fairy Tales' }} />
+        <Stack.Screen name="Story" component={StoryScreen} options={{ title: 'Story' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
